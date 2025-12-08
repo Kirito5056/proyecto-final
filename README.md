@@ -1,6 +1,6 @@
-#Trabajo Final del Primer Periodo de Introduccion a la Programacion
+# Trabajo Final del Primer Periodo de Introduccion a la Programacion
 
-##En los talleres de fundición de la Empresa de Tuberías y Aspersores se llevan diferentes controles que permiten recopilar información necesaria para la
+## En los talleres de fundición de la Empresa de Tuberías y Aspersores se llevan diferentes controles que permiten recopilar información necesaria para la
  toma de decisiones y optimización de sus procesos. Uno de ellos consiste en llevar el registro de la cantidad de defectos por cada producto en cada tirada.
 .Para el desarrollo del programa siga las siguientes instrucciones:
     • Construya un arreglo teniendo en cuenta la cantidad de productos a analizar y las tiradas realizadas en el proceso productivo. 
