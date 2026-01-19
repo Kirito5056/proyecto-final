@@ -37,19 +37,24 @@ void menor_cantidad_de_defectos(int n, int m, const vector<vector<int>>& matriz)
 }
 
 
-//Subprograma Ejercicio 5
+//Subprograma Ejercicio 5 (CORREGIDO)
+// Ahora cuenta productos defectuosos (>0) en lugar de sumar defectos totales.
 int encontrar_tirada_critica(int n, int m, const std::vector<std::vector<int>>& matriz){
-    // Sin libreria climits, usamos un numero muy bajo (negativo)
-    int mayor_total_defectos = -1; 
+    int mayor_cant_prod_defectuosos = -1; 
     int tirada_critica = 0;
+
     for(int j = 0; j < m; j++){
-        int total_defectos_tirada = 0;
+        int contador_productos_malos = 0; // Contador por tirada
+        
         for(int i = 0; i < n; i++){
-            total_defectos_tirada += matriz[i][j];
+            // Si el producto tiene al menos 1 defecto, lo contamos
+            if(matriz[i][j] > 0){
+                contador_productos_malos++;
+            }
         }
 
-        if(total_defectos_tirada > mayor_total_defectos){
-            mayor_total_defectos = total_defectos_tirada;
+        if(contador_productos_malos > mayor_cant_prod_defectuosos){
+            mayor_cant_prod_defectuosos = contador_productos_malos;
             tirada_critica = j + 1; 
         }
     }
@@ -70,6 +75,7 @@ bool verificar_mantenimiento(int n, int m, const vector<vector<int>>& matriz){
         total_ultima_tirada += matriz[i][m - 1]; 
         total_penultima_tirada += matriz[i][m - 2];
     }
+    // [cite: 10] Debe ser mayor a 150 en CADA una de las ultimas 2 tiradas
     return (total_ultima_tirada > limite_defectos && total_penultima_tirada > limite_defectos);
 }
 
@@ -88,6 +94,7 @@ bool verificar_eficiencia(int n, int m, const vector<vector<int>>& matriz){
             tiradas_eficientes++;
         }
     }
+    // [cite: 11] Eficiente si realiza MAS de 5 tiradas ( > 5 )
     if (tiradas_eficientes > limite_tiradas_eficientes) {
         return true;
     } else {
@@ -105,6 +112,7 @@ int total_defectos_producto(int producto_index, int m, const vector<vector<int>>
     }
     return total;
 }
+
 //Subprograma principal modificado para selección aleatoria con <random>
 void obtener_relacion_equivalencia(int n, int m, const vector<vector<int>>& matriz) {
     const int NUM_REQUERIDOS = 5;
@@ -123,7 +131,7 @@ void obtener_relacion_equivalencia(int n, int m, const vector<vector<int>>& matr
     cout << "Seleccionando " << limite << " productos de manera aleatoria..." << endl;
     
     while(productos_seleccionados.size() < limite){
-        int id_random = distribucion_indices(gen); // Genera numero usando <random>
+        int id_random = distribucion_indices(gen); 
         bool repetido = false;
         
         for(int id : productos_seleccionados){
@@ -195,6 +203,7 @@ void mostrar_matriz_2x2(const string& nombre, const vector<vector<int>>& matriz)
     cout << "  | " << matriz[0][0] << "  " << matriz[0][1] << " |" << endl;
     cout << "  | " << matriz[1][0] << "  " << matriz[1][1] << " |" << endl;
 }
+
 //Subprograma principal
 void procesar_y_multiplicar_matrices(int n, int m, const vector<vector<int>>& matriz_defectos) {
     if (n < 2 || m < 2) {
@@ -212,6 +221,8 @@ void procesar_y_multiplicar_matrices(int n, int m, const vector<vector<int>>& ma
         cout << " ID de producto no válido o fuera de rango." << endl;
         return;
     }
+    
+    // [cite: 15] Si alguno corresponde al ultimo, se selecciona el anterior
     if (id1 == n - 1) { 
         cout << " El ID original del Producto 1 corresponde al último. Se usará el ID " << id1 - 1 << " para la Matriz A." << endl;
         id1 = n - 2; 
@@ -246,80 +257,83 @@ void procesar_y_multiplicar_matrices(int n, int m, const vector<vector<int>>& ma
 
 
 int main(){
-// Configuración del generador aleatorio usando solo <random>
-random_device rd;
-mt19937 gen(rd());
-uniform_int_distribution<> distribucion_defectos(0, 20); // Defectos entre 0 y 20
+    // Configuración del generador aleatorio usando solo <random>
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> distribucion_defectos(0, 20); // Defectos entre 0 y 20
 
-cout<<endl<<"#####Bienvenido al Trabajo Final de IP de Pedro Enrique Perez Lopez#####"<<endl<<endl;
+    cout<<endl<<"#####Bienvenido al Trabajo Final de IP de Pedro Enrique Perez Lopez#####"<<endl<<endl;
 
-cout<<"Ejercicio 1"<<endl;
-int n; //Este va a ser numero de productos a analizar
-int m; //Este va a ser la cantidad de tiradas realizadas
-cout<<"Ingrese la cantidad de productos a analizar: ";cin>>n;
-cout<<"Ingrese la cantidad de tiradas realizadas: ";cin>>m;
-vector<vector<int>> matriz_defectos(n, vector<int>(m));
+    cout<<"Ejercicio 1"<<endl;
+    int n; //Este va a ser numero de productos a analizar
+    int m; //Este va a ser la cantidad de tiradas realizadas
+    cout<<"Ingrese la cantidad de productos a analizar: ";cin>>n;
+    cout<<"Ingrese la cantidad de tiradas realizadas: ";cin>>m;
+    
+    // [cite: 4] Construya un arreglo con cantidad de productos y tiradas
+    vector<vector<int>> matriz_defectos(n, vector<int>(m));
 
-// Llenado automatico de la matriz usando la libreria <random>
-cout<<"Generando datos aleatorios para la matriz de defectos..."<<endl;
-for(int i=0;i<n;i++){
-    for(int j=0;j<m;j++){
-        // Usamos la distribucion configurada al inicio
-        matriz_defectos[i][j] = distribucion_defectos(gen); 
+    // Llenado automatico de la matriz usando la libreria <random>
+    cout<<"Generando datos aleatorios para la matriz de defectos..."<<endl;
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            // Usamos la distribucion configurada al inicio
+            matriz_defectos[i][j] = distribucion_defectos(gen); 
+        }
     }
-}
-cout<<"Datos generados correctamente."<<endl;
+    cout<<"Datos generados correctamente."<<endl;
 
 
 
-cout<<endl<<"Ejercicio 2"<<endl;
-for (int i = 0; i < n; i++) {
-        // Inicializa el acumulador a CERO para CADA NUEVO producto
-        int total_defectos_producto = 0; 
-        
-        // Bucle Interior (Recorre las Tiradas - Columnas de la fila actual)
-        for (int j = 0; j < m; j++) {
-            // Suma el defecto de la posición actual [i][j] al total de la fila
-            total_defectos_producto += matriz_defectos[i][j];
+    cout<<endl<<"Ejercicio 2"<<endl;
+    for (int i = 0; i < n; i++) {
+            // Inicializa el acumulador a CERO para CADA NUEVO producto
+            int total_defectos_producto = 0; 
+            
+            // Bucle Interior (Recorre las Tiradas - Columnas de la fila actual)
+            for (int j = 0; j < m; j++) {
+                // Suma el defecto de la posición actual [i][j] al total de la fila
+                total_defectos_producto += matriz_defectos[i][j];
+            }
+
+            // Mostrar el resultado una vez que la fila completa ha sido sumada
+            cout << "El Producto " << i << " tuvo un total de " 
+                 << total_defectos_producto << " defectos." << endl;
         }
 
-        // Mostrar el resultado una vez que la fila completa ha sido sumada
-        cout << "El Producto " << i << " tuvo un total de " 
-             << total_defectos_producto << " defectos." << endl;
-    }
 
 
-
-cout<<endl<<"Ejercicio 3"<<endl;
+    cout<<endl<<"Ejercicio 3"<<endl;
     int defectos_totales_horno = total_de_defectos(n,m,matriz_defectos);
     cout << "El horno ha provocado un total de " <<defectos_totales_horno<<" defectos en toda la producción." << endl;
 
 
-cout<<endl<<"Ejercicio 4"<<endl;
+    cout<<endl<<"Ejercicio 4"<<endl;
     menor_cantidad_de_defectos(n,m,matriz_defectos);
 
 
-cout<<endl<<"Ejercicio 5"<<endl;
-int tirada_mayor = encontrar_tirada_critica(n,m,matriz_defectos);
-cout << "La tirada mayor del horno fue la tirada: "<<tirada_mayor<<endl;
+    cout<<endl<<"Ejercicio 5"<<endl;
+    int tirada_mayor = encontrar_tirada_critica(n,m,matriz_defectos);
+    //  Retorna el índice de la tirada donde hubo mayor cantidad de productos defectuosos
+    cout << "La tirada con MAYOR cantidad de PRODUCTOS defectuosos fue la tirada: " << tirada_mayor << endl;
 
 
-cout<<endl<<"Ejercicio 6"<<endl;
-bool necesita_mantenimiento = verificar_mantenimiento(n,m,matriz_defectos);
-cout<<"El Horno necesita mantenimiento?: "<<(necesita_mantenimiento ? "Verdadero" : "Falso")<<endl;
+    cout<<endl<<"Ejercicio 6"<<endl;
+    bool necesita_mantenimiento = verificar_mantenimiento(n,m,matriz_defectos);
+    cout<<"El Horno necesita mantenimiento?: "<<(necesita_mantenimiento ? "Verdadero" : "Falso")<<endl;
 
 
-cout<<endl<<"Ejercicio 7"<<endl;
-bool es_eficiente = verificar_eficiencia(n,m,matriz_defectos);
-cout<<"El horno trabaja eficientemente?: "<<(es_eficiente ? "Verdadero" : "Falso");
+    cout<<endl<<"Ejercicio 7"<<endl;
+    bool es_eficiente = verificar_eficiencia(n,m,matriz_defectos);
+    cout<<"El horno trabaja eficientemente?: "<<(es_eficiente ? "Verdadero" : "Falso");
 
 
-cout<<endl<<endl<<"Ejercicio 8"<<endl;
-obtener_relacion_equivalencia(n,m,matriz_defectos);
+    cout<<endl<<endl<<"Ejercicio 8"<<endl;
+    obtener_relacion_equivalencia(n,m,matriz_defectos);
 
 
-cout<<endl<<"Ejercicio 9"<<endl;
-procesar_y_multiplicar_matrices(n,m,matriz_defectos);
-
-return 0;
+    cout<<endl<<"Ejercicio 9"<<endl;
+    procesar_y_multiplicar_matrices(n,m,matriz_defectos);
+    
+    return 0;
 }
