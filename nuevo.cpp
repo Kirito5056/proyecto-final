@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <climits>
+#include <random> // Libreria moderna para generar numeros aleatorios
 using namespace std;
 
 //Subprogramas utilizados
@@ -19,7 +19,8 @@ int total_de_defectos(int n,int m,const vector<vector<int>>& matriz){
 
 //Subprograma Ejercicio 4
 void menor_cantidad_de_defectos(int n, int m, const vector<vector<int>>& matriz){
-    int menor_total_defectos = INT_MAX; 
+    // Sin libreria climits, usamos un numero muy alto manualmente
+    int menor_total_defectos = 99999999; 
     int tirada_optima = 0;
     for(int j = 0; j < m; j++){
         int total_defectos_tirada = 0;
@@ -38,7 +39,8 @@ void menor_cantidad_de_defectos(int n, int m, const vector<vector<int>>& matriz)
 
 //Subprograma Ejercicio 5
 int encontrar_tirada_critica(int n, int m, const std::vector<std::vector<int>>& matriz){
-    int mayor_total_defectos = INT_MIN; 
+    // Sin libreria climits, usamos un numero muy bajo (negativo)
+    int mayor_total_defectos = -1; 
     int tirada_critica = 0;
     for(int j = 0; j < m; j++){
         int total_defectos_tirada = 0;
@@ -98,58 +100,50 @@ bool verificar_eficiencia(int n, int m, const vector<vector<int>>& matriz){
 //Subprograma auxiliar para calcular el total de defectos por producto
 int total_defectos_producto(int producto_index, int m, const vector<vector<int>>& matriz) {
     int total = 0;
-    // Recorre las tiradas (columnas) para el producto dado (fila)
     for (int j = 0; j < m; j++) {
         total += matriz[producto_index][j];
     }
     return total;
 }
-//Subprograma principal
+//Subprograma principal modificado para selección aleatoria con <random>
 void obtener_relacion_equivalencia(int n, int m, const vector<vector<int>>& matriz) {
     const int NUM_REQUERIDOS = 5;
     if (n < NUM_REQUERIDOS) {
         cout << "ADVERTENCIA: Se necesitan al menos 5 productos. Usando todos los " << n << " productos disponibles." << endl;
-        return; 
     }
-    vector<int> productos_seleccionados(NUM_REQUERIDOS); 
-    cout << "Por favor, introduzca los ID de " << NUM_REQUERIDOS << " productos para el análisis (ID de 0 a " << n - 1 << "):" << endl;
+    
+    // Configuracion del generador aleatorio local
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> distribucion_indices(0, n - 1);
 
-    for (int i = 0; i < NUM_REQUERIDOS; i++) {
-        int id_ingresado;
-        bool valido = false;
-        while (!valido) {
-            cout << "  - ID Producto " << i + 1 << ": ";
-            if (cin >> id_ingresado) {
-                if (id_ingresado >= 0 && id_ingresado < n) {
-                    bool duplicado = false;
-                    for (int j = 0; j < i; j++) {
-                        if (productos_seleccionados[j] == id_ingresado) {
-                            duplicado = true;
-                            break;
-                        }
-                    }
-                    if (!duplicado) {
-                        productos_seleccionados[i] = id_ingresado;
-                        valido = true;
-                    } else {
-                        cout << " ID ya seleccionado. Intente de nuevo." << endl;
-                    }
-                } else {
-                    cout << " ID fuera de rango (0 a " << n - 1 << "). Intente de nuevo." << endl;
-                }
-            } else {
-                cout << " Entrada inválida. Intente de nuevo." << endl;
-                cin.clear();
-                cin.ignore(INT_MAX, '\n');
+    vector<int> productos_seleccionados;
+    int limite = (n < NUM_REQUERIDOS) ? n : NUM_REQUERIDOS;
+
+    cout << "Seleccionando " << limite << " productos de manera aleatoria..." << endl;
+    
+    while(productos_seleccionados.size() < limite){
+        int id_random = distribucion_indices(gen); // Genera numero usando <random>
+        bool repetido = false;
+        
+        for(int id : productos_seleccionados){
+            if(id == id_random){
+                repetido = true;
+                break;
             }
+        }
+        
+        if(!repetido){
+            productos_seleccionados.push_back(id_random);
         }
     }
 
-    cout << "\nProductos seleccionados (ID en la matriz): ";
+    cout << "\nProductos seleccionados aleatoriamente (ID): ";
     for (int id : productos_seleccionados) {
         cout << id << " ";
     }
     cout << endl;
+    
     vector<pair<int, int>> defectos_por_producto; 
     cout << "Totales de Defectos:" << endl;
     for (int id : productos_seleccionados) {
@@ -159,14 +153,14 @@ void obtener_relacion_equivalencia(int n, int m, const vector<vector<int>>& matr
     }
     cout << "\nClases de Equivalencia (Productos con el mismo total de defectos):" << endl;
     
-    vector<bool> ya_procesado(NUM_REQUERIDOS, false);
-    for (int i = 0; i < NUM_REQUERIDOS; i++) {
+    vector<bool> ya_procesado(limite, false);
+    for (int i = 0; i < limite; i++) {
         if (!ya_procesado[i]) {
             int defecto_base = defectos_por_producto[i].first;
             cout << "  [Clase de Defectos = " << defecto_base << "]: {";
             
             bool primer_elemento = true;
-            for (int j = i; j < NUM_REQUERIDOS; j++) {
+            for (int j = i; j < limite; j++) {
                 if (defectos_por_producto[j].first == defecto_base) {
                     if (!primer_elemento) {
                         cout << ", ";
@@ -252,6 +246,11 @@ void procesar_y_multiplicar_matrices(int n, int m, const vector<vector<int>>& ma
 
 
 int main(){
+// Configuración del generador aleatorio usando solo <random>
+random_device rd;
+mt19937 gen(rd());
+uniform_int_distribution<> distribucion_defectos(0, 20); // Defectos entre 0 y 20
+
 cout<<endl<<"#####Bienvenido al Trabajo Final de IP de Pedro Enrique Perez Lopez#####"<<endl<<endl;
 
 cout<<"Ejercicio 1"<<endl;
@@ -260,12 +259,16 @@ int m; //Este va a ser la cantidad de tiradas realizadas
 cout<<"Ingrese la cantidad de productos a analizar: ";cin>>n;
 cout<<"Ingrese la cantidad de tiradas realizadas: ";cin>>m;
 vector<vector<int>> matriz_defectos(n, vector<int>(m));
+
+// Llenado automatico de la matriz usando la libreria <random>
+cout<<"Generando datos aleatorios para la matriz de defectos..."<<endl;
 for(int i=0;i<n;i++){
     for(int j=0;j<m;j++){
-        cout<<"Ingrese la cantidad de defectos para el producto actual en la tirada actual["<<i<<"]["<<j<<"]: ";
-        cin>>matriz_defectos[i][j];    
+        // Usamos la distribucion configurada al inicio
+        matriz_defectos[i][j] = distribucion_defectos(gen); 
     }
 }
+cout<<"Datos generados correctamente."<<endl;
 
 
 
@@ -281,7 +284,7 @@ for (int i = 0; i < n; i++) {
         }
 
         // Mostrar el resultado una vez que la fila completa ha sido sumada
-        cout << "El Producto " << i + 1 << " tuvo un total de " 
+        cout << "El Producto " << i << " tuvo un total de " 
              << total_defectos_producto << " defectos." << endl;
     }
 
@@ -303,12 +306,12 @@ cout << "La tirada mayor del horno fue la tirada: "<<tirada_mayor<<endl;
 
 cout<<endl<<"Ejercicio 6"<<endl;
 bool necesita_mantenimiento = verificar_mantenimiento(n,m,matriz_defectos);
-cout<<"El Horno necesita mantenimiento?: "<<necesita_mantenimiento<<endl;
+cout<<"El Horno necesita mantenimiento?: "<<(necesita_mantenimiento ? "Verdadero" : "Falso")<<endl;
 
 
 cout<<endl<<"Ejercicio 7"<<endl;
 bool es_eficiente = verificar_eficiencia(n,m,matriz_defectos);
-cout<<"El horno trabaja eficientemente?: "<<es_eficiente;
+cout<<"El horno trabaja eficientemente?: "<<(es_eficiente ? "Verdadero" : "Falso");
 
 
 cout<<endl<<endl<<"Ejercicio 8"<<endl;
