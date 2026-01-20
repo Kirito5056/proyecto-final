@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
-#include <random> 
+#include <random>
 
 using namespace std;
 
 // --- SUBPROGRAMAS (EJERCICIOS) ---
 
-// Ejercicio 3: Retorna el total de defectos de toda la matriz
+// Ejercicio 3: Retorna el total de defectos
 int calcularTotalDefectos(int m, int n, const vector<vector<int>>& matriz) {
     int total = 0;
     for (int i = 0; i < m; i++) {
@@ -17,16 +17,13 @@ int calcularTotalDefectos(int m, int n, const vector<vector<int>>& matriz) {
     return total;
 }
 
-// Ejercicio 4: Muestra la tirada donde menor cantidad de defectos existieron
+// Ejercicio 4: Tirada con menor cantidad de defectos
 void mostrarTiradaMenorDefectos(int m, int n, const vector<vector<int>>& matriz) {
     int menor_suma = 0;
     int indice_tirada = 0;
-
     for (int i = 0; i < m; i++) {
         int suma_actual = 0;
-        for (int j = 0; j < n; j++) {
-            suma_actual += matriz[i][j];
-        }
+        for (int j = 0; j < n; j++) suma_actual += matriz[i][j];
         if (i == 0 || suma_actual < menor_suma) {
             menor_suma = suma_actual;
             indice_tirada = i;
@@ -35,11 +32,10 @@ void mostrarTiradaMenorDefectos(int m, int n, const vector<vector<int>>& matriz)
     cout << "La tirada con menor cantidad de defectos fue la: " << indice_tirada + 1 << endl;
 }
 
-// Ejercicio 5: Retorna el indice de la tirada donde hubo mayor cantidad de productos defectuosos
+// Ejercicio 5: Indice de tirada con mayor cantidad de PRODUCTOS defectuosos
 int obtenerIndiceTiradaCritica(int m, int n, const vector<vector<int>>& matriz) {
     int max_productos_defectuosos = -1;
     int indice_resultado = 0;
-
     for (int i = 0; i < m; i++) {
         int contador_productos = 0;
         for (int j = 0; j < n; j++) {
@@ -53,7 +49,7 @@ int obtenerIndiceTiradaCritica(int m, int n, const vector<vector<int>>& matriz) 
     return indice_resultado;
 }
 
-// Ejercicio 6: Retorna verdadero si el horno necesita mantenimiento (ultimas 2 tiradas > 150)
+// Ejercicio 6: Mantenimiento (ultimas 2 tiradas > 150 cada una)
 bool verificarMantenimiento(int m, int n, const vector<vector<int>>& matriz) {
     if (m < 2) return false;
     int suma_ultima = 0, suma_penultima = 0;
@@ -64,7 +60,7 @@ bool verificarMantenimiento(int m, int n, const vector<vector<int>>& matriz) {
     return (suma_ultima > 150 && suma_penultima > 150);
 }
 
-// Ejercicio 7: Diga si el horno trabaja eficientemente (> 5 tiradas con defectos < 50)
+// Ejercicio 7: Eficiencia (> 5 tiradas con < 50 defectos)
 bool verificarEficiencia(int m, int n, const vector<vector<int>>& matriz) {
     int tiradas_eficientes = 0;
     for (int i = 0; i < m; i++) {
@@ -75,14 +71,12 @@ bool verificarEficiencia(int m, int n, const vector<vector<int>>& matriz) {
     return (tiradas_eficientes > 5);
 }
 
-// Ejercicio 8: Relacion de equivalencia con 5 productos seleccionados ALEATORIAMENTE
+// Ejercicio 8: Relacion de equivalencia (5 productos aleatorios)
 void realizarRelacionEquivalencia(int m, int n, const vector<vector<int>>& matriz) {
     if (n < 5) {
-        cout << "Se requieren al menos 5 productos para este ejercicio." << endl;
+        cout << "\n[Aviso] Se requieren al menos 5 productos para este ejercicio." << endl;
         return;
     }
-
-    // Configuración de librería <random>
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> distrib(0, n - 1);
@@ -95,7 +89,7 @@ void realizarRelacionEquivalencia(int m, int n, const vector<vector<int>>& matri
         if (!repetido) seleccionados.push_back(id_azar);
     }
 
-    cout << "Productos seleccionados aleatoriamente (IDs): ";
+    cout << "\nProductos seleccionados aleatoriamente (IDs): ";
     for(int id : seleccionados) cout << id << " ";
     cout << "\nClases de equivalencia (por total historico de defectos):" << endl;
 
@@ -124,16 +118,34 @@ void realizarRelacionEquivalencia(int m, int n, const vector<vector<int>>& matri
 // Ejercicio 9: Multiplicacion de matrices 2x2
 void realizarOperacionMatrices(int m, int n, const vector<vector<int>>& matriz) {
     if (m < 2 || n < 2) return;
+    
     int id1, id2;
-    cout << "Ingrese ID del Producto A: "; cin >> id1;
-    cout << "Ingrese ID del Producto B: "; cin >> id2;
+    
+    // Validacion entrada ID 1
+    cout << "\nIngrese ID del Producto A: ";
+    while (!(cin >> id1) || id1 < 0 || id1 >= n) {
+        cout << "Error. Ingrese un ID valido entre 0 y " << n-1 << ": ";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
 
-    if (id1 >= n - 1) id1 = n - 2;
-    if (id2 >= n - 1) id2 = n - 2;
-    if (id1 < 0) id1 = 0; if (id2 < 0) id2 = 0;
+    // Validacion entrada ID 2
+    cout << "Ingrese ID del Producto B: ";
+    while (!(cin >> id2) || id2 < 0 || id2 >= n) {
+        cout << "Error. Ingrese un ID valido entre 0 y " << n-1 << ": ";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
 
+    // Regla del enunciado: si es el ultimo, se elige el anterior
+    if (id1 == n - 1) id1 = n - 2;
+    if (id2 == n - 1) id2 = n - 2;
+
+    // Matriz A (Filas 0 y 1, Columnas id1 e id1+1)
     int matA[2][2] = { {matriz[0][id1], matriz[0][id1+1]}, {matriz[1][id1], matriz[1][id1+1]} };
+    // Matriz B (Filas 0 y 1, Columnas id2 e id2+1)
     int matB[2][2] = { {matriz[0][id2], matriz[0][id2+1]}, {matriz[1][id2], matriz[1][id2+1]} };
+    
     int matC[2][2];
     matC[0][0] = matA[0][0]*matB[0][0] + matA[0][1]*matB[1][0];
     matC[0][1] = matA[0][0]*matB[0][1] + matA[0][1]*matB[1][1];
@@ -148,16 +160,34 @@ void realizarOperacionMatrices(int m, int n, const vector<vector<int>>& matriz) 
 
 int main() {
     int m, n;
-    cout << "Ingrese cantidad de productos (Y): "; cin >> n;
-    cout << "Ingrese cantidad de tiradas (X): "; cin >> m;
+
+    // Validacion N (productos)
+    cout << "Ingrese cantidad de productos (Y): ";
+    while (!(cin >> n) || n <= 0) {
+        cout << "Error. Ingrese un numero entero positivo: ";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
+
+    // Validacion M (tiradas)
+    cout << "Ingrese cantidad de tiradas (X): ";
+    while (!(cin >> m) || m <= 0) {
+        cout << "Error. Ingrese un numero entero positivo: ";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
 
     vector<vector<int>> matriz(m, vector<int>(n));
 
-    cout << "\n--- LLENADO MANUAL DE LA MATRIZ ---" << endl;
+    cout << "\n--- LLENADO DE LA MATRIZ ---" << endl;
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            cout << "Tirada " << i << ", Producto " << j << ": ";
-            cin >> matriz[i][j];
+            cout << "Tirada " << i << ", Producto " << j << " (defectos): ";
+            while (!(cin >> matriz[i][j]) || matriz[i][j] < 0) {
+                cout << "Error. Ingrese un numero de defectos valido (0 o mas): ";
+                cin.clear();
+                cin.ignore(1000, '\n');
+            }
         }
     }
 
